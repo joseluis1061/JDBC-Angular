@@ -1,7 +1,7 @@
 package org.example.joseFrontend.model;
 
 public class User {
-  String user_id;
+  Integer user_id;
   String login;
   String password;
   String nickname;
@@ -10,7 +10,7 @@ public class User {
   public User() {
   }
 
-  public User(String email, String login, String nickname, String password, String user_id) {
+  public User(String email, String login, String nickname, String password, Integer user_id) {
     this.email = email;
     this.login = login;
     this.nickname = nickname;
@@ -50,11 +50,11 @@ public class User {
     this.password = password;
   }
 
-  public String getUser_id() {
+  public Integer getUser_id() {
     return user_id;
   }
 
-  public void setUser_id(String user_id) {
+  public void setUser_id(Integer user_id) {
     this.user_id = user_id;
   }
 
