@@ -17,8 +17,7 @@ public class UserRepository implements Repository<User> {
   public List<User> findAll() throws SQLException {
     List<User> user = new ArrayList<>();
     try(
-        Connection myConn = getConnection();
-        Statement myStat = myConn.createStatement();
+        Statement myStat = getConnection().createStatement();
         ResultSet myRes = myStat.executeQuery("SELECT * FROM usuarios");
     ){
       while (myRes.next()){
@@ -29,14 +28,11 @@ public class UserRepository implements Repository<User> {
     return user;
   }
 
-
-
   @Override
   public User getByUid(Integer id) throws SQLException {
     User user = null;
     try(
-        Connection myConn = getConnection();
-        PreparedStatement myPrep = myConn.prepareStatement("SELECT * FROM usuarios WHERE user_id = ?");
+        PreparedStatement myPrep = getConnection().prepareStatement("SELECT * FROM usuarios WHERE user_id = ?");
         ) {
       myPrep.setInt(1, id);
       try(
@@ -51,13 +47,43 @@ public class UserRepository implements Repository<User> {
   }
 
   @Override
-  public void save(User user) {
+  public void save(User user) throws SQLException {
+    if(user.getUser_id() == null && user.getUser_id()<=0){
+      String sql = "INSERT INTO usuarios (login, password, nickname, email) VALUES (?,?,?,?)";
+      try(
+          PreparedStatement myPrep = getConnection().prepareStatement(sql);
+      ) {
+        myPrep.setString(1, user.getLogin());
+        myPrep.setString(2, user.getPassword());
+        myPrep.setString(3, user.getNickname());
+        myPrep.setString(4, user.getEmail());
+        myPrep.executeUpdate();
+      }
+      return;
+    }
+    String sql = "UPDATE usuarios SET login= ?, password= ?, nickname= ?, email= ? WHERE user_id = ?";
+    try(
+        PreparedStatement myPrep = getConnection().prepareStatement(sql);
+    ) {
+      myPrep.setString(1, user.getLogin());
+      myPrep.setString(2, user.getPassword());
+      myPrep.setString(3, user.getNickname());
+      myPrep.setString(4, user.getEmail());
+      myPrep.setInt(5, user.getUser_id());
+      myPrep.executeUpdate();
+    }
+    return;
 
   }
 
   @Override
-  public void delete(Integer id) {
-
+  public void delete(Integer id) throws SQLException {
+    try(
+        PreparedStatement myStat = getConnection().prepareStatement("DELETE FROM usuarios WHERE user_id=?")
+        ){
+      myStat.setInt(1, id);
+      myStat.executeUpdate();
+    }
   }
 
   private User getUser(ResultSet myRes) throws SQLException {
