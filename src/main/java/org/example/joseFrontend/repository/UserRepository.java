@@ -48,7 +48,8 @@ public class UserRepository implements Repository<User> {
 
   @Override
   public void save(User user) throws SQLException {
-    if(user.getUser_id() == null && user.getUser_id()<=0){
+    if(user.getUser_id() == null){
+      System.out.println("Crear");
       String sql = "INSERT INTO usuarios (login, password, nickname, email) VALUES (?,?,?,?)";
       try(
           PreparedStatement myPrep = getConnection().prepareStatement(sql);
@@ -61,6 +62,7 @@ public class UserRepository implements Repository<User> {
       }
       return;
     }
+    System.out.println("Actualizar");
     String sql = "UPDATE usuarios SET login= ?, password= ?, nickname= ?, email= ? WHERE user_id = ?";
     try(
         PreparedStatement myPrep = getConnection().prepareStatement(sql);
