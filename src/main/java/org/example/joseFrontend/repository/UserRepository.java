@@ -9,10 +9,8 @@ import java.util.List;
 
 public class UserRepository implements Repository<User> {
 
-  private final Connection myConn;
-
-  public UserRepository(Connection myConn) {
-    this.myConn = myConn;
+  private Connection getConnection() throws SQLException {
+    return DatabaseConnection.getConnection();
   }
 
 
@@ -20,6 +18,7 @@ public class UserRepository implements Repository<User> {
   public List<User> findAll() throws SQLException {
     List<User> users = new ArrayList<>();
     try(
+        Connection myConn = getConnection();
         Statement myStat = myConn.createStatement();
         ResultSet myRes = myStat.executeQuery("SELECT * FROM usuarios");
     ){
@@ -35,6 +34,7 @@ public class UserRepository implements Repository<User> {
   public User getByUid(Integer id) throws SQLException {
     User user = null;
     try(
+        Connection myConn = getConnection();
         PreparedStatement myPrep = myConn.prepareStatement("SELECT * FROM usuarios WHERE user_id = ?");
         ) {
       myPrep.setInt(1, id);
@@ -54,6 +54,7 @@ public class UserRepository implements Repository<User> {
     if(user.getUser_id() == null){
       String sql = "INSERT INTO usuarios (login, password, nickname, email) VALUES (?,?,?,?)";
       try(
+          Connection myConn = getConnection();
           PreparedStatement myPrep = myConn.prepareStatement(sql);
       ) {
         myPrep.setString(1, user.getLogin());
@@ -67,6 +68,7 @@ public class UserRepository implements Repository<User> {
     System.out.println("Actualizar");
     String sql = "UPDATE usuarios SET login= ?, password= ?, nickname= ?, email= ? WHERE user_id = ?";
     try(
+        Connection myConn = getConnection();
         PreparedStatement myPrep = myConn.prepareStatement(sql);
     ) {
       myPrep.setString(1, user.getLogin());
@@ -83,6 +85,7 @@ public class UserRepository implements Repository<User> {
   @Override
   public void delete(Integer id) throws SQLException {
     try(
+        Connection myConn = getConnection();
         PreparedStatement myStat = myConn.prepareStatement("DELETE FROM usuarios WHERE user_id=?")
         ){
       myStat.setInt(1, id);
