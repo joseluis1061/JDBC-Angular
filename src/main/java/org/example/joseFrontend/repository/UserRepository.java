@@ -9,30 +9,33 @@ import java.util.List;
 
 public class UserRepository implements Repository<User> {
 
-  private Connection getConnection() throws SQLException {
-    return DatabaseConnection.getInstance();
+  private final Connection myConn;
+
+  public UserRepository(Connection myConn) {
+    this.myConn = myConn;
   }
+
 
   @Override
   public List<User> findAll() throws SQLException {
-    List<User> user = new ArrayList<>();
+    List<User> users = new ArrayList<>();
     try(
-        Statement myStat = getConnection().createStatement();
+        Statement myStat = myConn.createStatement();
         ResultSet myRes = myStat.executeQuery("SELECT * FROM usuarios");
     ){
       while (myRes.next()){
         User e = getUser(myRes);
-        user.add(e);
+        users.add(e);
       }
     }
-    return user;
+    return users;
   }
 
   @Override
   public User getByUid(Integer id) throws SQLException {
     User user = null;
     try(
-        PreparedStatement myPrep = getConnection().prepareStatement("SELECT * FROM usuarios WHERE user_id = ?");
+        PreparedStatement myPrep = myConn.prepareStatement("SELECT * FROM usuarios WHERE user_id = ?");
         ) {
       myPrep.setInt(1, id);
       try(
@@ -49,10 +52,9 @@ public class UserRepository implements Repository<User> {
   @Override
   public void save(User user) throws SQLException {
     if(user.getUser_id() == null){
-      System.out.println("Crear");
       String sql = "INSERT INTO usuarios (login, password, nickname, email) VALUES (?,?,?,?)";
       try(
-          PreparedStatement myPrep = getConnection().prepareStatement(sql);
+          PreparedStatement myPrep = myConn.prepareStatement(sql);
       ) {
         myPrep.setString(1, user.getLogin());
         myPrep.setString(2, user.getPassword());
@@ -65,7 +67,7 @@ public class UserRepository implements Repository<User> {
     System.out.println("Actualizar");
     String sql = "UPDATE usuarios SET login= ?, password= ?, nickname= ?, email= ? WHERE user_id = ?";
     try(
-        PreparedStatement myPrep = getConnection().prepareStatement(sql);
+        PreparedStatement myPrep = myConn.prepareStatement(sql);
     ) {
       myPrep.setString(1, user.getLogin());
       myPrep.setString(2, user.getPassword());
@@ -81,7 +83,7 @@ public class UserRepository implements Repository<User> {
   @Override
   public void delete(Integer id) throws SQLException {
     try(
-        PreparedStatement myStat = getConnection().prepareStatement("DELETE FROM usuarios WHERE user_id=?")
+        PreparedStatement myStat = myConn.prepareStatement("DELETE FROM usuarios WHERE user_id=?")
         ){
       myStat.setInt(1, id);
       myStat.executeUpdate();
